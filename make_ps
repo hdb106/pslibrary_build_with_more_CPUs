@@ -22,7 +22,15 @@ work=./WORK
 BIN_DIR=$PWDIR/bin
 
 mkdir $work >& /dev/null
-mkdir PSEUDOPOTENTIALS >& /dev/null
+mkdir $1 >& /dev/null
+
+
+function check {
+   # 检查上一个命令的退出状态码
+   if [ $? -ne 0 ]; then
+      echo "任务异常：$1"
+   fi
+}
 
 #
 #   These two files generate PAW and US PPs for all elements. These are
@@ -92,7 +100,7 @@ for elem in $element ; do
        for atom in *.in ; do
           echo -e "Making   $atom  ...\c"
           $ld1_command < ./$atom > $work/$atom.out
-          echo '  Done' 
+          check $atom.out
        done
 
     else
@@ -100,11 +108,12 @@ for elem in $element ; do
        for atom in "$elem"*.in ; do
            echo -e "Making   $atom  ...\c"
            $ld1_command < ./$atom > $work/$atom.out
-           echo '  Done' 
+           check $atom.out
        done
 
     fi
 done
 
-\mv *.UPF PSEUDOPOTENTIALS
+\mv *.UPF $1
 \mv *.in WORK
+# \rm -rf WORK

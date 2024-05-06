@@ -1,0 +1,64 @@
+#!/bin/bash
+
+function signal_handle {
+    echo trapped
+    kill 0
+
+    exit 1
+}
+
+trap 'signal_handle' EXIT
+
+[ -e /tmp/fd1 ] || mkfifo /tmp/fd1 #创建有名管道
+exec 3<>/tmp/fd1                   #创建文件描述符，以可读（<）可写（>）的方式关联管道文件，这时候文件描述符3就有了有名管道文件的所有特性
+rm -rf /tmp/fd1                    #关联后的文件描述符拥有管道文件的所有特性,所以这时候管道文件可以删除，我们留下文件描述符来用就可以了
+
+read -p "请输入并发数(默认为5):" -i 5 thread
+for ((i=1;i<=$thread;i++))
+do
+    echo >&3                   #&3代表引用文件描述符3，这条命令代表往管道里面放入了一个"令牌"
+done
+
+make_ps() {
+
+    read -u3
+    {
+        # 生成不同类型的赝势
+        # 运行命令，这里用echo作为示例命令
+        start=$(date +%s)
+        source ../make_ps "$2"
+        end=$(date +%s)
+        runtime=$((end-start))
+        echo "在$1中开始生成$2赝势用时：$runtime s"
+        echo >&3                   #代表我这一次命令执行到最后，把令牌放回管道
+    }&
+    
+}
+
+THREAD_COUNT=4
+
+# 列表
+funcs=("bp" "pbe" "pbesol")
+# funcs=("bp" "pbe" "pbesol" "pw91" "pz" "rel-bp" "rel-pbe" "rel-pbesol" "rel-pw91" "rel-pz" "rel-revpbe" "rel-wc" "revpbe" "wc")
+pseudo=("PAW_HIGH")
+# pseudo=("PAW_HIGH" "PAW_LOW" "US_HIGH" "US_LOW" "NC")
+start1=$(date +%s)
+# 遍历列表
+for item1 in "${funcs[@]}"
+do
+    cd "$item1"
+    for item2 in "${pseudo[@]}"
+        do
+            
+        make_ps $item1 $item2
+        done
+    cd -
+done
+wait
+end1=$(date +%s)
+runtime1=$((end1-start1))
+
+exec 3<&-
+exec 3>&-
+
+echo "总用时：$runtime1 s"
