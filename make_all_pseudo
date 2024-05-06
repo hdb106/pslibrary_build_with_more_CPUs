@@ -18,7 +18,6 @@ for ((i=1;i<=$thread;i++))
 do
     echo >&3                   #&3代表引用文件描述符3，这条命令代表往管道里面放入了一个"令牌"
 done
-
 make_ps() {
 
     read -u3
@@ -26,7 +25,7 @@ make_ps() {
         # 生成不同类型的赝势
         # 运行命令，这里用echo作为示例命令
         start=$(date +%s)
-        source ../make_ps "$2"
+        source ../make_ps "$2" 1>> ../job.log
         end=$(date +%s)
         runtime=$((end-start))
         echo "在$1中开始生成$2赝势用时：$runtime s"
@@ -52,7 +51,7 @@ do
             
         make_ps $item1 $item2
         done
-    cd -
+    cd - > /dev/null
 done
 wait
 end1=$(date +%s)

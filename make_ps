@@ -91,23 +91,23 @@ function check {
 
 ld1_command="$PARA_PREFIX $BIN_DIR/ld1.x $PARA_POSTFIX"
 
-echo "ld1_command =" $ld1_command
+# echo "ld1_command =" $ld1_command
 
 for elem in $element ; do
     if [ $elem = "all" ] ;
     then
 
        for atom in *.in ; do
-          echo -e "Making   $atom  ...\c"
-          $ld1_command < ./$atom > $work/$atom.out
+         #  echo -e "Making   $atom  ...\c"
+          $ld1_command < ./$atom > $work/$atom.out 1>/dev/null 2>/dev/null
           check $atom.out
        done
 
     else
 
        for atom in "$elem"*.in ; do
-           echo -e "Making   $atom  ...\c"
-           $ld1_command < ./$atom > $work/$atom.out
+         #   echo -e "Making   $atom  ...\c"
+           $ld1_command < ./$atom > $work/$atom.out 1>/dev/null 2>/dev/null
            check $atom.out
        done
 

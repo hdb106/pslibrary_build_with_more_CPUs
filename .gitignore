@@ -13,3 +13,8 @@ include/c_defs.h
 install/config.log
 install/config.status
 install/configure.msg
+*.UPF
+*.in
+*.out
+ld1*
+vx.pot
