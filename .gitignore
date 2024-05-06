@@ -18,3 +18,4 @@ install/configure.msg
 *.out
 ld1*
 vx.pot
+job.log
