@@ -21,8 +21,11 @@ work=./WORK
 . $PWDIR/environment_variables
 BIN_DIR=$PWDIR/bin
 
+rm -rf *.in
+rm -rf WORK
+rm -rf $2
 mkdir $work >& /dev/null
-mkdir $1 >& /dev/null
+mkdir $2 >& /dev/null
 
 
 function check {
@@ -32,20 +35,51 @@ function check {
    fi
 }
 
+
+#!/bin/bash
+
+variable="a"
+
+case $2 in
+    "PAW_HIGH")
+        echo "$1: $2"
+        . ../paw_ps_high.job
+        ;;
+    "PAW_LOW")
+        echo "$1: $2"
+        . ../paw_ps_low.job
+        ;;
+    "US_HIGH")
+        echo "$1: $2"
+        . ../us_ps_high.job
+        ;;
+    "US_LOW")
+        echo "$1: $2"
+        . ../us_ps_low.job
+        ;;
+    "NC")
+        echo "$1: $2"
+        . ../nc_ps_collection.job
+        ;;
+    "*")
+        echo "暂不支持生成此类型的赝势$2"
+        ;;
+esac
+
 #
 #   These two files generate PAW and US PPs for all elements. These are
 #   high accuracy - high kinetic energy cut-off PPs.
 #
-. ../paw_ps_high.job
-. ../us_ps_high.job
+
+
 #
 #   These two files generate additional PAW and US PPs for some elements. 
 #   These are less accurate PP than the previous one but require
 #   lower kinetic energy cut-off or have less projectors or less semicore
 #   states.
 #
-. ../paw_ps_low.job
-. ../us_ps_low.job
+
+
 
 #  Uncomment the following line to generate the old pslibrary 0.3.1 PPs. 
 #
@@ -55,7 +89,7 @@ function check {
 #  Uncomment the following line to generate the NC-PPs. Be very careful
 #  these PPs are completely untested.
 #
-#. ../nc_ps_collection.job
+
 
 #  Uncomment the following line to generate additional PAW data sets. Be
 #  careful these PPs might have problems.
@@ -99,7 +133,7 @@ for elem in $element ; do
 
        for atom in *.in ; do
          #  echo -e "Making   $atom  ...\c"
-          $ld1_command < ./$atom > $work/$atom.out 1>/dev/null 2>/dev/null
+          $ld1_command < ./$atom > $work/$atom.out > /dev/null 2>&1
           check $atom.out
        done
 
@@ -107,13 +141,14 @@ for elem in $element ; do
 
        for atom in "$elem"*.in ; do
          #   echo -e "Making   $atom  ...\c"
-           $ld1_command < ./$atom > $work/$atom.out 1>/dev/null 2>/dev/null
+           $ld1_command < ./$atom > $work/$atom.out > /dev/null 2>&1
            check $atom.out
        done
 
     fi
 done
 
-\mv *.UPF $1
-\mv *.in WORK
-# \rm -rf WORK
+\mv *.UPF $2
+# \mv *.in WORK
+\rm -rf *.in
+\rm -rf WORK

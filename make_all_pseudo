@@ -18,14 +18,14 @@ for ((i=1;i<=$thread;i++))
 do
     echo >&3                   #&3代表引用文件描述符3，这条命令代表往管道里面放入了一个"令牌"
 done
-make_ps() {
 
+make_ps() {
     read -u3
     {
         # 生成不同类型的赝势
         # 运行命令，这里用echo作为示例命令
         start=$(date +%s)
-        source ../make_ps "$2" 1>> ../job.log
+        source ../make_ps $1 $2 >> ../job.log
         end=$(date +%s)
         runtime=$((end-start))
         echo "在$1中开始生成$2赝势用时：$runtime s"
@@ -34,24 +34,24 @@ make_ps() {
     
 }
 
-THREAD_COUNT=4
+# 用于保存错误结构的日志
+echo "" > job.log
 
 # 列表
-funcs=("bp" "pbe" "pbesol")
-# funcs=("bp" "pbe" "pbesol" "pw91" "pz" "rel-bp" "rel-pbe" "rel-pbesol" "rel-pw91" "rel-pz" "rel-revpbe" "rel-wc" "revpbe" "wc")
-pseudo=("PAW_HIGH")
-# pseudo=("PAW_HIGH" "PAW_LOW" "US_HIGH" "US_LOW" "NC")
+funcs=("bp" "pbe" "pbesol" "pw91" "pz" "rel-bp" "rel-pbe" "rel-pbesol" "rel-pw91" "rel-pz" "rel-revpbe" "rel-wc" "revpbe" "wc")
+# funcs=("bp" "pbe")
+# pseudo=("PAW_HIGH")
+pseudo=("PAW_HIGH" "PAW_LOW" "US_HIGH" "US_LOW" "NC")
 start1=$(date +%s)
 # 遍历列表
-for item1 in "${funcs[@]}"
+for item2 in "${pseudo[@]}"
 do
-    cd "$item1"
-    for item2 in "${pseudo[@]}"
+    for item1 in "${funcs[@]}"
         do
-            
-        make_ps $item1 $item2
+            cd "$item1"
+            make_ps $item1 $item2
+            cd - > /dev/null
         done
-    cd - > /dev/null
 done
 wait
 end1=$(date +%s)
