@@ -19,3 +19,5 @@ install/configure.msg
 ld1*
 vx.pot
 job.log
+*.pyc
+cutoff/*
