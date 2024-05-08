@@ -21,3 +21,4 @@ vx.pot
 job.log
 *.pyc
 cutoff/*
+pseudo.csv

@@ -43,13 +43,23 @@ def is_skipdir(dir):
         if i in dir:
             return True
 
-for func in Path.cwd().iterdir():
-    if func.is_dir() and not is_skipdir(func.name):
-        for pp_type in func.iterdir():
-            if pp_type.is_dir():
-                info = dict()
-                for file in pp_type.iterdir():
-                    
+def main(suffix="txt"):
+    for func in Path.cwd().iterdir():
+        if func.is_dir() and not is_skipdir(func.name):
+            for pp_type in func.iterdir():
+                if pp_type.is_dir():
+                    info = dict()
+                    for file in pp_type.iterdir():
+                        
+                        if file.is_file():
+                            symbol = get_pp_name(file.name)
+                            info[symbol] = get_cutoff(file)
+                        else:
+                            print(file, "不是文件")
+
+                    df = pd.DataFrame(info, columns=all_symbols)
+                    print_df = df.T
+
                     if "NC" in pp_type.name:
                         pptype = pp_type.name.replace("NC", "Norm-Conversing")
                     elif "US" in pp_type.name:
@@ -57,17 +67,19 @@ for func in Path.cwd().iterdir():
                     else:
                         pptype = pp_type.name
 
-                    json_name = cutoff_dir / \
-                        f"{func.name.upper()}_{pptype}.json"
-                    if file.is_file():
-                        symbol = get_pp_name(file.name)
-                        info[symbol] = get_cutoff(file)
+                    if suffix == "txt":
+                        aligned_text = print_df.to_string(justify='right')  # 将 DataFrame 转换为严格对齐的字符串形式，每列宽度根据最大字符串长度设置，不包含索引
+                        txt_name = cutoff_dir / \
+                            f"{func.name.upper()}_{pptype}.txt"
+                        with open(txt_name, "w") as f:
+                            f.write(aligned_text)
+                        
+                    elif suffix == "json":
+                        json_name = cutoff_dir / \
+                            f"{func.name.upper()}_{pptype}.json"
+                        print_df.to_json(json_name)
                     else:
-                        print(file, "不是文件")
+                        raise ValueError(f"暂不支持{suffix}格式的输出")
 
-                df = pd.DataFrame(info, columns=all_symbols)
-                print_df = df.T
-                print(print_df)
-                with open(json_name, "w", encoding='utf-8') as f:
-                    json.dump(info, f, indent=2)
-                print(json_name)
+if __name__ == '__main__':
+    main()
